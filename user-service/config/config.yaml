@@ -1,0 +1,16 @@
+version: "v1"
+secret: "6a627a7fb025e2c5db643267523a1c801c1178bed30331a2606fe93f4dd9aa7b"
+http:
+  port: "8080"
+  timeout: 4s
+  idle_timeout: 60s
+postgres:
+  user: "postgres"
+  password: "password"
+  database: "user-service"
+  url: "localhost:5432"
+mail:
+  user: "rt.auth@mail.ru"
+  password: "dKaCHyuhbY3RvcgurkC8"
+  host: "smtp.mail.ru"
+  port: 465

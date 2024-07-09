@@ -1,0 +1,13 @@
+version: "v1"
+secret: "4be150c458be24ef1a057e75eba45857e1bcf4e7e0f357cafd573aed571f6f9c"
+http:
+  port: "8081"
+  timeout: 4s
+  idle_timeout: 60s
+postgres:
+  user: "postgres"
+  password: "password"
+  database: "device-service"
+grpc:
+  auth_token: "device_app_secret_id"
+  user_token: "device_app_secret_id"

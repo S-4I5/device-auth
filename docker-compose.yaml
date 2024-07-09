@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: ./deployment/user-service.dockerfile
+    container_name: user-service_app_container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=user-service
+      - POSTGRES_URL=user-postgres:5432
+    restart: always
+    depends_on:
+      - user-postgres
+    ports:
+      - "8080:8080"
+    expose:
+      - "50051"
+      - "50052"
+
+  device-service:
+    build:
+      context: .
+      dockerfile: ./device-service/deployment/device-auth.dockerfile
+    container_name: device-service_app_container
+    environment:
+      - HTTP-PORT=8081
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=device-service
+      - POSTGRES_URL=device-postgres:5432
+      - AUTH-GRPC-URL=user-service:50051
+      - USER-GRPC-URL=user-service:50052
+    restart: always
+    depends_on:
+      - device-postgres
+    ports:
+      - "8081:8081"
+
+  user-postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=user-service
+      - POSTGRES_HOST_AUTH_METHOD=md5
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d password" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    expose:
+      - "5432"
+
+  device-postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=device-service
+      - POSTGRES_HOST_AUTH_METHOD=md5
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d password" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    expose:
+      - "5432"

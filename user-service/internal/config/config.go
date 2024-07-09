@@ -1,0 +1,60 @@
+package config
+
+import (
+	"fmt"
+	"github.com/ilyakaznacheev/cleanenv"
+	"time"
+)
+
+type Config struct {
+	Secret   string         `yaml:"secret"`
+	Version  string         `yaml:"version" env:"VERSION" env-default:"v1"`
+	Http     HttpConfig     `yaml:"http"`
+	Postgres PostgresConfig `yaml:"postgres"`
+	Grpc     GrpcConfig     `json:"grpc"`
+	Mail     MailConfig     `json:"mail"`
+}
+
+type HttpConfig struct {
+	Port        string        `yaml:"port" env:"HTTP-PORT" env-default:"8080"`
+	Timeout     time.Duration `yaml:"timeout"`
+	IdleTimeout time.Duration `yaml:"idle_timeout"`
+}
+
+type PostgresConfig struct {
+	User     string `yaml:"user" env:"POSTGRES_USER" env-default:"postgres"`
+	Password string `yaml:"password" env:"POSTGRES_PASSWORD" env-default:""`
+	Database string `yaml:"database" env:"POSTGRES_DB" env-default:"postgres"`
+	Url      string `yaml:"url" env:"POSTGRES_URL" env-default:"localhost:5432"`
+}
+
+type GrpcConfig struct {
+	AuthPort string `yaml:"auth_port" env:"AUTH-GRPC-PORT" env-default:"50051"`
+	UserPort string `yaml:"user_port" env:"USER-GRPC-PORT" env-default:"50052"`
+}
+
+type MailConfig struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+}
+
+func MustRead(path string) Config {
+	var cfg Config
+
+	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
+		panic(err.Error())
+	}
+
+	return cfg
+}
+
+func (c *Config) PostgresConnectionString() string {
+	return fmt.Sprintf("postgres://%s:%s@%s/%s",
+		c.Postgres.User,
+		c.Postgres.Password,
+		c.Postgres.Url,
+		c.Postgres.Database,
+	)
+}

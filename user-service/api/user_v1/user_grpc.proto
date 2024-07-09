@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package user_v1;
+
+option go_package = "user-service/pkg/user_v1;user_v1";
+
+service UserV1 {
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+  rpc GetUserByPhoneNumber(GetUserByPhoneNumberRequest) returns (GetUserByPhoneNumberResponse);
+}
+
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+message GetUserByIdResponse {
+  User user = 1;
+}
+
+message GetUserByPhoneNumberRequest {
+  string phoneNumber = 1;
+}
+
+message GetUserByPhoneNumberResponse {
+    User user = 1;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string phone_number = 3;
+  bool isEmailVerified = 4;
+}

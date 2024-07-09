@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package auth_v1;
+
+option go_package="user-service/pkg/auth_v1;auth_v1";
+
+service AuthV1 {
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+message AuthenticateUserRequest {
+  string userId = 1;
+}
+
+message AuthenticateUserResponse {
+  string token = 1;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  string userId = 1;
+}
