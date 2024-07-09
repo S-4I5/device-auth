@@ -12,23 +12,29 @@
 
 Сначала нужно в зарегистрировать юзера в user-service:
 POST localhost:8080/api/v1/auth/sign-in
-```{
-"email" : "xxx@gmail.com",
-"password" : "xxx",
-"phoneNumber" : "xxx"
-}```
+```
+{
+    "email" : "xxx@gmail.com",
+    "password" : "xxx",
+    "phoneNumber" : "xxx"
+}
+```
 
 P.S. у пользователей можно подтверждать почту в POST POST /verify-email/{id}. Вместо id нужно подставить uuid, приходящий в пиьсме
 
 Далее идём к device-service и запрашиваем регистрацию устройства:
 POST localhost:8081/api/v1/auth/sign-in
-```{
-"phoneNumber" : "+xxx"
-}```
+```
+{
+    "phoneNumber" : "+xxx"
+}
+```
 Он возвращает:
-```{
-"codeToken": "token"
-}```
+```
+{
+    "codeToken": "token"
+}
+```
 Это токен, с которым нужно будет подтвердить устройство (мол после запроса на устройство придёт смс, но денег на телефонию нет), только код надо будет смотреть в логах device-service, там 5 символов будут
 
 Подтверждаем устройство:
@@ -37,16 +43,20 @@ POST localhost:8081/api/v1/auth/verify-device?code=(тут код) с получ
 
 Установка пина:
 POST localhost:8081/api/v1/auth/set-pin
-```{
-"pinCode" : "123"
-}```
+```
+{
+    "pinCode" : "123"
+}
+```
 Если всё ок - 200 и пустое тело
 
 Далее можно логиниться:
 POST localhost:8081/api/v1/auth/login
-```{
-"pin":"123"
-}```
+```
+{
+    "pin":"123"
+}
+```
 И в ответ получим токен user-a, которому этот телефон привязан)
 
 Чтобы его проверить, можно получить инфо о юзере в user-service:
