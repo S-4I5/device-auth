@@ -9,8 +9,3 @@ postgres:
   password: "password"
   database: "user-service"
   url: "localhost:5432"
-mail:
-  user: "rt.auth@mail.ru"
-  password: "dKaCHyuhbY3RvcgurkC8"
-  host: "smtp.mail.ru"
-  port: 465
