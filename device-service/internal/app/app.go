@@ -45,10 +45,11 @@ func (a *App) setupHttp() error {
 
 	ctx := context.TODO()
 
-	authRouter.HandleFunc("POST /sign-in", a.provider.AuthController().SignIn(ctx))
-	authRouter.HandleFunc("POST /verify-device", a.provider.AuthController().VerifyDevice(ctx))
-	authRouter.HandleFunc("POST /set-pin", a.provider.AuthController().SetPin(ctx))
+	authRouter.HandleFunc("POST /sign-up", a.provider.AuthController().SignUp(ctx))
+	authRouter.HandleFunc("PATCH /verify-device", a.provider.AuthController().VerifyDevice(ctx))
+	authRouter.HandleFunc("PATCH /set-pin", a.provider.AuthController().SetPin(ctx))
 	authRouter.HandleFunc("POST /login", a.provider.AuthController().LoginUser(ctx))
+	authRouter.HandleFunc("PATCH /bind-user", a.provider.AuthController().BindUser(ctx))
 
 	version := http.NewServeMux()
 

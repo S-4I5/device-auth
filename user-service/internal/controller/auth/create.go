@@ -7,17 +7,17 @@ import (
 	dto2 "user-service/internal/model/dto"
 )
 
-func (c *controller) SignInUser(ctx context.Context) http.HandlerFunc {
+func (c *controller) SignUpUser(ctx context.Context) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
-		var dto dto2.SignInUserRequestDto
+		var dto dto2.SignUpUserRequestDto
 		if err := json.NewDecoder(request.Body).Decode(&dto); err != nil {
 			c.errHandler.ReturnUnprocessableEntityError(writer, err)
 			return
 		}
 
-		resp, err := c.authService.SignInUser(dto)
+		resp, err := c.authService.SignUpUser(dto)
 		if err != nil {
 			c.errHandler.ReturnServiceError(writer, err)
 			return

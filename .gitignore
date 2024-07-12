@@ -22,3 +22,4 @@ go.work.sum
 .env
 
 .idea
+docker-compose-remote.yaml

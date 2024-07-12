@@ -18,11 +18,13 @@ type DeviceService interface {
 	Get(id uuid.UUID) (entity.Device, error)
 	Verify(id uuid.UUID) error
 	SetPin(id uuid.UUID, pin string) error
+	SetUser(id, userId uuid.UUID) error
 }
 
 type AuthService interface {
-	SingIn(req dto.SingInDeviceRequestDto) (dto.SingInDeviceResponseDto, error)
+	SingUp(req dto.SingUpDeviceRequestDto) (dto.SingUpDeviceResponseDto, error)
 	SetPin(req dto.SetPinRequestDto, deviceId uuid.UUID) error
 	LoginUser(req dto.LoginUserRequestDto, deviceId uuid.UUID) (dto.LoginUserResponseDto, error)
 	VerifyDevice(code string, codeId uuid.UUID) (dto.VerifyDeviceResponseDto, error)
+	BindUserToDevice(req dto.BindUserToDeviceDtoRequest, deviceId uuid.UUID) error
 }

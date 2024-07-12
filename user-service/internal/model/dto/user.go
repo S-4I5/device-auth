@@ -2,20 +2,21 @@ package dto
 
 import "github.com/google/uuid"
 
-type SignInUserRequestDto struct {
+type SignUpUserRequestDto struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	Password    string `json:"password"`
 }
 
-type SignInUserResponseDto struct {
-	Id    uuid.UUID `yaml:"id"`
-	Token string    `yaml:"token"`
+type SignUpUserResponseDto struct {
+	Id    uuid.UUID `json:"id"`
+	Token string    `json:"token"`
 }
 
 type LoginUserRequestDto struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	PhoneNumber string `json:"phoneNumber"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
 }
 
 type LoginUserResponseDto struct {
