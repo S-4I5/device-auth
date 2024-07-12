@@ -3,6 +3,8 @@ package device
 import (
 	"context"
 	"device-service/internal/model/entity"
+	"device-service/internal/repository/device/model"
+	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -27,6 +29,7 @@ func NewRepository(client *pgxpool.Pool) *repository {
 }
 
 func (r *repository) Create(device entity.Device) (entity.Device, error) {
+
 	builder := squirrel.Insert(tableName).PlaceholderFormat(squirrel.Dollar).
 		Columns(phoneNumberColumnName).
 		Values(device.PhoneNumber).
@@ -44,12 +47,13 @@ func (r *repository) Create(device entity.Device) (entity.Device, error) {
 		return entity.DeviceNil(), err
 	}
 
-	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[entity.Device])
+	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.Device])
 	if err != nil {
+		fmt.Println("XD")
 		return entity.DeviceNil(), err
 	}
 
-	return result, nil
+	return model.DbDeviceToDevice(result), nil
 }
 
 func (r *repository) Get(id uuid.UUID) (entity.Device, error) {
@@ -69,15 +73,15 @@ func (r *repository) Get(id uuid.UUID) (entity.Device, error) {
 		return entity.DeviceNil(), err
 	}
 
-	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[entity.Device])
+	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.Device])
 	if err != nil {
 		return entity.DeviceNil(), err
 	}
 
-	return result, nil
+	return model.DbDeviceToDevice(result), nil
 }
 
-func (r *repository) Verify(id uuid.UUID) error {
+func (r *repository) SetVerified(id uuid.UUID) error {
 	builder := squirrel.Update(tableName).PlaceholderFormat(squirrel.Dollar).
 		Set(isVerifiedColumnName, true).
 		Where(squirrel.Eq{idColumnName: id})
@@ -113,6 +117,30 @@ func (r *repository) SetPin(id uuid.UUID, pin string) error {
 	if err != nil {
 		return err
 	}
+
+	rows.Next()
+
+	return rows.Err()
+}
+
+func (r *repository) SetUser(id uuid.UUID, userId uuid.UUID) error {
+	builder := squirrel.Update(tableName).PlaceholderFormat(squirrel.Dollar).
+		Set(userIdColumnName, userId).
+		Where(squirrel.Eq{idColumnName: id})
+
+	sql, args, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	ctx := context.TODO()
+
+	rows, err := r.client.Query(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+
+	rows.Next()
 
 	return rows.Err()
 }

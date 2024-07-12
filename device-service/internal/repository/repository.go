@@ -15,6 +15,7 @@ type CodeRepository interface {
 type DeviceRepository interface {
 	Create(device entity.Device) (entity.Device, error)
 	Get(id uuid.UUID) (entity.Device, error)
-	Verify(id uuid.UUID) error
+	SetVerified(id uuid.UUID) error
 	SetPin(id uuid.UUID, pin string) error
+	SetUser(id, userId uuid.UUID) error
 }
