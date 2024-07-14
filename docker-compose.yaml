@@ -12,9 +12,10 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=user-service
       - POSTGRES_URL=user-postgres:5432
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - user-postgres
+      user-postgres:
+        condition: service_healthy
     ports:
       - "8080:8080"
     expose:
@@ -34,9 +35,12 @@ services:
       - POSTGRES_URL=device-postgres:5432
       - AUTH-GRPC-URL=user-service:50051
       - USER-GRPC-URL=user-service:50052
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - device-postgres
+      device-postgres:
+        condition: service_healthy
+      user-postgres:
+        condition: service_started
     ports:
       - "8081:8081"
 
@@ -47,6 +51,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=user-service
       - POSTGRES_HOST_AUTH_METHOD=md5
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d password" ]
       interval: 10s
@@ -63,6 +68,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=device-service
       - POSTGRES_HOST_AUTH_METHOD=md5
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d password" ]
       interval: 10s
