@@ -8,6 +8,7 @@ import (
 	"user-service/internal/email"
 	"user-service/internal/jwt"
 	dtoPack "user-service/internal/model/dto"
+	"user-service/internal/model/entity"
 	service2 "user-service/internal/service"
 )
 
@@ -27,10 +28,10 @@ func NewService(tokenService jwt.TokenService, userService service2.UserService,
 	}
 }
 
-func (s *service) SignInUser(dto dtoPack.SignInUserRequestDto) (dtoPack.SignInUserResponseDto, error) {
+func (s *service) SignUpUser(dto dtoPack.SignUpUserRequestDto) (dtoPack.SignUpUserResponseDto, error) {
 	user, err := s.userService.Create(dto.Email, dto.Password, dto.PhoneNumber)
 	if err != nil {
-		return dtoPack.SignInUserResponseDto{}, err
+		return dtoPack.SignUpUserResponseDto{}, err
 	}
 
 	code, _ := s.codeService.Create(dto.Email)
@@ -39,17 +40,24 @@ func (s *service) SignInUser(dto dtoPack.SignInUserRequestDto) (dtoPack.SignInUs
 
 	tok, err := s.tokenService.CreateToken(user, "self")
 	if err != nil {
-		return dtoPack.SignInUserResponseDto{}, err
+		return dtoPack.SignUpUserResponseDto{}, err
 	}
 
-	return dtoPack.SignInUserResponseDto{
+	return dtoPack.SignUpUserResponseDto{
 		Id:    user.Id,
 		Token: tok,
 	}, err
 }
 
 func (s *service) LoginUser(dto dtoPack.LoginUserRequestDto) (dtoPack.LoginUserResponseDto, error) {
-	user, err := s.userService.GetByEmail(dto.Email)
+	var user entity.User
+	var err error
+
+	if dto.PhoneNumber != "" {
+		user, err = s.userService.GetByPhoneNumber(dto.PhoneNumber)
+	} else {
+		user, err = s.userService.GetByEmail(dto.Email)
+	}
 	if err != nil {
 		return dtoPack.LoginUserResponseDto{}, err
 	}

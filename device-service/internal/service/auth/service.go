@@ -31,43 +31,32 @@ func NewService(codeService service2.CodeService, deviceService service2.DeviceS
 	}
 }
 
-func (s *service) SingIn(req dto.SingInDeviceRequestDto) (dto.SingInDeviceResponseDto, error) {
-	ctx := context.TODO()
+func (s *service) SingUp(req dto.SingUpDeviceRequestDto) (dto.SingUpDeviceResponseDto, error) {
 
-	res, err := s.userClient.GetUserByPhoneNumber(ctx, &user_v1.GetUserByPhoneNumberRequest{PhoneNumber: req.PhoneNumber})
-	if err != nil {
-		return dto.SingInDeviceResponseDto{}, err
-	}
-
-	userUuid, err := uuid.Parse(res.GetUser().GetId())
-	if err != nil {
-		return dto.SingInDeviceResponseDto{}, err
-	}
+	fmt.Printf(req.PhoneNumber)
 
 	device, err := s.deviceService.Create(entity.Device{
 		PhoneNumber: req.PhoneNumber,
-		UserId:      userUuid,
 	})
 	if err != nil {
-		return dto.SingInDeviceResponseDto{}, err
+		return dto.SingUpDeviceResponseDto{}, err
 	}
 
 	code, err := s.codeService.Create(entity.ActivationCode{
 		DeviceId: device.Id,
 	})
 	if err != nil {
-		return dto.SingInDeviceResponseDto{}, err
+		return dto.SingUpDeviceResponseDto{}, err
 	}
 
-	//send somehow
 	log.Println(code.Code)
 
 	tkn, err := s.tokenCreator.CreateCodeToken(code)
 	if err != nil {
-		return dto.SingInDeviceResponseDto{}, err
+		return dto.SingUpDeviceResponseDto{}, err
 	}
 
-	return dto.SingInDeviceResponseDto{CodeToken: tkn}, nil
+	return dto.SingUpDeviceResponseDto{CodeToken: tkn}, nil
 }
 
 func (s *service) SetPin(req dto.SetPinRequestDto, deviceId uuid.UUID) error {
@@ -123,4 +112,21 @@ func (s *service) VerifyDevice(code string, codeId uuid.UUID) (dto.VerifyDeviceR
 	}
 
 	return dto.VerifyDeviceResponseDto{Token: tkn}, nil
+}
+
+func (s *service) BindUserToDevice(req dto.BindUserToDeviceDtoRequest, deviceId uuid.UUID) error {
+	ctx := context.TODO()
+	fmt.Printf(req.UserToken)
+
+	authResp, err := s.authClient.ValidateToken(ctx, &auth_v1.ValidateTokenRequest{Token: req.UserToken})
+	if err != nil {
+		return err
+	}
+
+	userId, err := uuid.Parse(authResp.GetUserId())
+	if err != nil {
+		return err
+	}
+
+	return s.deviceService.SetUser(deviceId, userId)
 }

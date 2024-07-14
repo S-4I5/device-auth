@@ -150,14 +150,15 @@ func (a *App) setupHttp(ctx context.Context) error {
 
 	authRouter := http.NewServeMux()
 
-	authRouter.HandleFunc("POST /sign-in", a.provider.AuthController().SignInUser(ctx))
-	authRouter.HandleFunc("POST /verify-email/{id}", a.provider.AuthController().VerifyUserEmail(ctx))
+	authRouter.HandleFunc("POST /sign-up", a.provider.AuthController().SignUpUser(ctx))
+	authRouter.HandleFunc("PATCH /verify-email/{id}", a.provider.AuthController().VerifyUserEmail(ctx))
 	authRouter.HandleFunc("POST /login", a.provider.AuthController().LoginUser(ctx))
 
 	userRouter := http.NewServeMux()
 
-	userRouter.HandleFunc("GET /my", a.provider.UserController().GetMe(ctx))
+	userRouter.HandleFunc("GET /me", a.provider.UserController().GetMe(ctx))
 	userRouter.HandleFunc("GET /{id}", a.provider.UserController().Get(ctx))
+	userRouter.HandleFunc("GET /search", a.provider.UserController().GetByPhoneNumber(ctx))
 
 	version := http.NewServeMux()
 

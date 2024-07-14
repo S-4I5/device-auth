@@ -22,7 +22,7 @@ type CodeService interface {
 }
 
 type AuthService interface {
-	SignInUser(dto dto.SignInUserRequestDto) (dto.SignInUserResponseDto, error)
+	SignUpUser(dto dto.SignUpUserRequestDto) (dto.SignUpUserResponseDto, error)
 	LoginUser(dto dto.LoginUserRequestDto) (dto.LoginUserResponseDto, error)
 	VerifyUserEmail(codeId uuid.UUID) error
 	AuthenticateUserBySideApp(userId uuid.UUID, issuerId string) (string, error)

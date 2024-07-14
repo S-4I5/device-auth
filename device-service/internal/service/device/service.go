@@ -26,6 +26,10 @@ func (s *service) SetPin(id uuid.UUID, pin string) error {
 	return s.deviceRepository.SetPin(id, pin)
 }
 
+func (s *service) SetUser(id, userId uuid.UUID) error {
+	return s.deviceRepository.SetUser(id, userId)
+}
+
 func (s *service) Verify(id uuid.UUID) error {
-	return s.deviceRepository.Verify(id)
+	return s.deviceRepository.SetVerified(id)
 }

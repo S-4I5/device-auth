@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS device (
     id uuid DEFAULT public.uuid_generate_v4(),
     phone_number text NOT NULL,
     pin_code text,
-    user_id uuid,
+    user_id text,
     is_verified bool DEFAULT false,
     CONSTRAINT device_pk PRIMARY KEY (id)
 );
