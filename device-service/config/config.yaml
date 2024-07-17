@@ -8,6 +8,6 @@ postgres:
   user: "postgres"
   password: "password"
   database: "device-service"
-grpc:
-  auth_token: "device_app_secret_id"
-  user_token: "device_app_secret_id"
+user-grpc:
+  client-id: "device_service"
+  client-secret: "device_service_secret"

@@ -5,7 +5,7 @@ import (
 	"device-service/internal/config"
 	"device-service/internal/controller"
 	auth2 "device-service/internal/controller/auth"
-	"device-service/internal/err"
+	"device-service/internal/httperr"
 	"device-service/internal/jwt"
 	"device-service/internal/repository"
 	code2 "device-service/internal/repository/code"
@@ -15,7 +15,6 @@ import (
 	"device-service/internal/service/code"
 	"device-service/internal/service/device"
 	"device-service/internal/util"
-	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -34,8 +33,8 @@ type serviceProvider struct {
 	authService        service.AuthService
 	deviceService      service.DeviceService
 	codeService        service.CodeService
-	errorHandler       err.ErrorHandler
-	errorMessageSource err.ErrorMessageSource
+	errorHandler       httperr.ErrorHandler
+	errorMessageSource httperr.ErrorMessageSource
 	codeRepository     repository.CodeRepository
 	deviceRepository   repository.DeviceRepository
 }
@@ -57,17 +56,17 @@ func (s *serviceProvider) Config() config.Config {
 	return s.config
 }
 
-func (s *serviceProvider) ErrorMessageSource() err.ErrorMessageSource {
+func (s *serviceProvider) ErrorMessageSource() httperr.ErrorMessageSource {
 	if s.errorMessageSource == nil {
-		s.errorMessageSource = err.NewMessageSource()
+		s.errorMessageSource = httperr.NewMessageSource()
 	}
 
 	return s.errorMessageSource
 }
 
-func (s *serviceProvider) ErrorHandler() err.ErrorHandler {
+func (s *serviceProvider) ErrorHandler() httperr.ErrorHandler {
 	if s.errorHandler == nil {
-		s.errorHandler = err.NewHandler(s.ErrorMessageSource())
+		s.errorHandler = httperr.NewHandler(s.ErrorMessageSource())
 	}
 
 	return s.errorHandler
@@ -80,11 +79,12 @@ func (s *serviceProvider) AuthV1Client() auth_v1.AuthV1Client {
 			log.Fatal(err.Error())
 		}
 
-		fmt.Println(s.config.Grpc.AuthUrl)
-
-		conn, err := grpc.NewClient(s.config.Grpc.AuthUrl,
+		conn, err := grpc.NewClient(s.config.UserGrpc.AuthUrl,
 			grpc.WithTransportCredentials(creds),
-			grpc.WithPerRPCCredentials(util.TokenAuth{Token: s.config.Grpc.AuthToken}),
+			grpc.WithPerRPCCredentials(util.TokenAuth{
+				Username: s.Config().UserGrpc.ClientId,
+				Password: s.Config().UserGrpc.ClientSecret,
+			}),
 		)
 		if err != nil {
 			panic("cannot setup AuthV1 grpc conn" + err.Error())
@@ -103,11 +103,12 @@ func (s *serviceProvider) UserV1Client() user_v1.UserV1Client {
 			log.Fatal(err.Error())
 		}
 
-		fmt.Println(s.config.Grpc.UserUrl)
-
-		conn, err := grpc.NewClient(s.config.Grpc.UserUrl,
+		conn, err := grpc.NewClient(s.config.UserGrpc.UserUrl,
 			grpc.WithTransportCredentials(creds),
-			grpc.WithPerRPCCredentials(util.TokenAuth{Token: s.config.Grpc.UserToken}),
+			grpc.WithPerRPCCredentials(util.TokenAuth{
+				Username: s.Config().UserGrpc.ClientId,
+				Password: s.Config().UserGrpc.ClientSecret,
+			}),
 		)
 		if err != nil {
 			panic("cannot setup UserV1 grpc conn" + err.Error())

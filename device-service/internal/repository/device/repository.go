@@ -4,7 +4,6 @@ import (
 	"context"
 	"device-service/internal/model/entity"
 	"device-service/internal/repository/device/model"
-	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -28,7 +27,7 @@ func NewRepository(client *pgxpool.Pool) *repository {
 	return &repository{client: client}
 }
 
-func (r *repository) Create(device entity.Device) (entity.Device, error) {
+func (r *repository) Save(device entity.Device) (entity.Device, error) {
 
 	builder := squirrel.Insert(tableName).PlaceholderFormat(squirrel.Dollar).
 		Columns(phoneNumberColumnName).
@@ -49,7 +48,6 @@ func (r *repository) Create(device entity.Device) (entity.Device, error) {
 
 	result, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.Device])
 	if err != nil {
-		fmt.Println("XD")
 		return entity.DeviceNil(), err
 	}
 

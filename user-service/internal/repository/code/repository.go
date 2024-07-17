@@ -27,7 +27,7 @@ func NewRepository(client *pgxpool.Pool) *repository {
 	return &repository{client: client}
 }
 
-func (r *repository) Create(email string) (entity.Code, error) {
+func (r *repository) Save(email string) (entity.Code, error) {
 	builder := squirrel.Insert(tableName).
 		PlaceholderFormat(squirrel.Dollar).
 		Columns(emailColumnName).

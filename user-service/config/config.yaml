@@ -9,3 +9,9 @@ postgres:
   password: "password"
   database: "user-service"
   url: "localhost:5432"
+clients:
+  - client_id: "device_service"
+    client_secret: "device_service_secret"
+    scopes:
+      - "AuthV1Validation"
+      - "AuthV1Authenticate"

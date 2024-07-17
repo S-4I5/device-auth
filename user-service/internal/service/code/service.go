@@ -17,7 +17,7 @@ func NewService(codeRepository repository.CodeRepository) *service {
 }
 
 func (s *service) Create(email string) (uuid.UUID, error) {
-	code, err := s.repository.Create(email)
+	code, err := s.repository.Save(email)
 	if err != nil {
 		return uuid.Nil, err
 	}

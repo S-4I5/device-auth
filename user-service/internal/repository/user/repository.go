@@ -56,8 +56,8 @@ func (r *repository) GetByEmail(email string) (entity.User, error) {
 	return result, nil
 }
 
-func (r *repository) Create(email, password string, phoneNumber string) (entity.User, error) {
-	const op = "user/repository/Create"
+func (r *repository) Save(email, password string, phoneNumber string) (entity.User, error) {
+	const op = "user/repository/Save"
 
 	builder := squirrel.Insert(userTableName).
 		PlaceholderFormat(squirrel.Dollar).

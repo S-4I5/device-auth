@@ -24,7 +24,7 @@ func NewRepository(client *pgxpool.Pool) *repository {
 	return &repository{client: client}
 }
 
-func (r *repository) Create(code entity.ActivationCode) (entity.ActivationCode, error) {
+func (r *repository) Save(code entity.ActivationCode) (entity.ActivationCode, error) {
 	builder := squirrel.Insert(tableName).PlaceholderFormat(squirrel.Dollar).
 		Columns(deviceIdColumnName, codeColumnName).
 		Values(code.DeviceId, code.Code).

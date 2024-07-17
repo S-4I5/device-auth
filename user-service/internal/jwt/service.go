@@ -41,10 +41,6 @@ func (s *tokenService) CreateToken(user entity.User, issuer string) (string, err
 
 	tkn, _ := token.SignedString([]byte(s.secret))
 
-	fmt.Println(tkn)
-
-	fmt.Println(s.ValidateToken(tkn))
-
 	return tkn, nil
 }
 

@@ -11,8 +11,9 @@ type Config struct {
 	Version  string         `yaml:"version" env:"VERSION" env-default:"v1"`
 	Http     HttpConfig     `yaml:"http"`
 	Postgres PostgresConfig `yaml:"postgres"`
-	Grpc     GrpcConfig     `json:"grpc"`
-	Mail     MailConfig     `json:"mail"`
+	Grpc     GrpcConfig     `yaml:"grpc"`
+	Mail     MailConfig     `yaml:"mail"`
+	Clients  []Client       `yaml:"clients"`
 }
 
 type HttpConfig struct {
@@ -29,15 +30,21 @@ type PostgresConfig struct {
 }
 
 type GrpcConfig struct {
-	AuthPort string `yaml:"auth_port" env:"AUTH-GRPC-PORT" env-default:"50051"`
-	UserPort string `yaml:"user_port" env:"USER-GRPC-PORT" env-default:"50052"`
+	AuthPort string `yaml:"auth_port" env:"AUTH-GRPC-URL" env-default:"50051"`
+	UserPort string `yaml:"user_port" env:"USER-GRPC-URL" env-default:"50052"`
 }
 
 type MailConfig struct {
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+}
+
+type Client struct {
+	ClientId     string   `yaml:"client_id"`
+	ClientSecret string   `yaml:"client_secret"`
+	Scopes       []string `yaml:"scopes"`
 }
 
 func MustRead(path string) Config {
@@ -46,6 +53,8 @@ func MustRead(path string) Config {
 	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
 		panic(err.Error())
 	}
+
+	fmt.Println(cfg)
 
 	return cfg
 }

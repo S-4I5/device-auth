@@ -2,7 +2,7 @@ package user
 
 import (
 	def "user-service/internal/controller"
-	errPack "user-service/internal/err"
+	errPack "user-service/internal/httperr"
 	"user-service/internal/jwt"
 	"user-service/internal/service"
 )

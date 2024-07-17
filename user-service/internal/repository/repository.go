@@ -6,7 +6,7 @@ import (
 )
 
 type UserRepository interface {
-	Create(email, password string, phoneNumber string) (entity.User, error)
+	Save(email, password string, phoneNumber string) (entity.User, error)
 	Get(id uuid.UUID) (entity.User, error)
 	GetByEmail(email string) (entity.User, error)
 	GetByPhoneNumber(phoneNumber string) (entity.User, error)
@@ -14,7 +14,12 @@ type UserRepository interface {
 }
 
 type CodeRepository interface {
-	Create(email string) (entity.Code, error)
+	Save(email string) (entity.Code, error)
 	Get(id uuid.UUID) (entity.Code, error)
 	Delete(id uuid.UUID) error
+}
+
+type ClientRepository interface {
+	Save(client entity.Client) error
+	Get(id string) (entity.Client, error)
 }

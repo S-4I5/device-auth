@@ -11,13 +11,13 @@ type Config struct {
 	Version  string         `yaml:"version" env:"VERSION" env-default:"v1"`
 	Http     HttpConfig     `yaml:"http"`
 	Postgres PostgresConfig `yaml:"postgres"`
-	Grpc     GrpcConfig     `json:"grpc"`
+	UserGrpc UserGrpcConfig `yaml:"user-grpc"`
 }
 
 type HttpConfig struct {
 	Port        string        `yaml:"port" env:"HTTP-PORT" env-default:"8080"`
 	Timeout     time.Duration `yaml:"timeout"`
-	IdleTimeout time.Duration `yaml:"idle_timeout"`
+	IdleTimeout time.Duration `yaml:"idle-timeout"`
 }
 
 type PostgresConfig struct {
@@ -27,11 +27,11 @@ type PostgresConfig struct {
 	Url      string `yaml:"url" env:"POSTGRES_URL" env-default:"localhost:5434"`
 }
 
-type GrpcConfig struct {
-	AuthUrl   string `yaml:"auth_url" env:"AUTH-GRPC-URL" env-default:":50051"`
-	UserUrl   string `yaml:"user_url" env:"USER-GRPC-URL" env-default:":50052"`
-	AuthToken string `yaml:"auth_token" env:"AUTH-GRPC-TOKEN"`
-	UserToken string `yaml:"user_token" env:"USER-GRPC-TOKEN"`
+type UserGrpcConfig struct {
+	ClientId     string `yaml:"client-id" env:"GRPC-CLIENT-ID"`
+	ClientSecret string `yaml:"client-secret" env:"GRPC-CLIENT-SECRET"`
+	AuthUrl      string `yaml:"auth-url" env:"GRPC-AUTH-URL" env-default:":50051"`
+	UserUrl      string `yaml:"user-url" env:"GRPC-USER-URL" env-default:":50052"`
 }
 
 func MustRead(path string) Config {
@@ -40,6 +40,8 @@ func MustRead(path string) Config {
 	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
 		panic(err.Error())
 	}
+
+	fmt.Println(cfg)
 
 	return cfg
 }

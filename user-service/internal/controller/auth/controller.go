@@ -1,7 +1,7 @@
 package auth
 
 import (
-	errPack "user-service/internal/err"
+	errPack "user-service/internal/httperr"
 	"user-service/internal/service"
 )
 

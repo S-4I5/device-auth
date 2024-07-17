@@ -4,19 +4,23 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	auth3 "user-service/internal/api/auth"
+	"user-service/internal/api/interceptor"
+	"user-service/internal/api/scope"
 	user4 "user-service/internal/api/user"
 	"user-service/internal/config"
 	"user-service/internal/controller"
 	"user-service/internal/controller/auth"
 	user3 "user-service/internal/controller/user"
 	"user-service/internal/email"
-	"user-service/internal/err"
+	"user-service/internal/httperr"
 	"user-service/internal/jwt"
 	"user-service/internal/repository"
+	"user-service/internal/repository/client"
 	"user-service/internal/repository/code"
 	"user-service/internal/repository/user"
 	"user-service/internal/service"
 	auth2 "user-service/internal/service/auth"
+	client2 "user-service/internal/service/client"
 	code2 "user-service/internal/service/code"
 	user2 "user-service/internal/service/user"
 )
@@ -24,11 +28,12 @@ import (
 type serviceProvider struct {
 	authServerImpl   *auth3.AuthenticationServiceImplementation
 	userServerImpl   *user4.UserV1ServiceImplementation
-	errMessageSource err.ErrorMessageSource
-	errHandler       err.ErrorHandler
+	errMessageSource httperr.ErrorMessageSource
+	errHandler       httperr.ErrorHandler
 	tokenService     jwt.TokenService
 	config           config.Config
 	pool             *pgxpool.Pool
+	scopeValidator   scope.Validator
 	codeRepository   repository.CodeRepository
 	userRepository   repository.UserRepository
 	userService      service.UserService
@@ -36,6 +41,9 @@ type serviceProvider struct {
 	authService      service.AuthService
 	userController   controller.UserController
 	authController   controller.AuthController
+	authInterceptor  interceptor.AuthInterceptor
+	clientService    service.ClientService
+	clientRepository repository.ClientRepository
 	emailSender      email.Sender
 }
 
@@ -45,16 +53,47 @@ func NewServiceProvider(cfg config.Config) *serviceProvider {
 	}
 }
 
-func (p *serviceProvider) ErrorMessageSource() err.ErrorMessageSource {
+func (p *serviceProvider) ScopeValidator() scope.Validator {
+	if p.scopeValidator == nil {
+		p.scopeValidator = scope.NewValidator(
+			p.AuthenticationServiceImplementation().GetMethodScopeMap(),
+			p.UserV1ServiceImplementation().GetMethodScopeMap(),
+		)
+	}
+	return p.scopeValidator
+}
+
+func (p *serviceProvider) AuthInterceptor() interceptor.AuthInterceptor {
+	if p.authInterceptor == nil {
+		p.authInterceptor = interceptor.NewAuthInterceptor(p.ClientService(), p.ScopeValidator())
+	}
+	return p.authInterceptor
+}
+
+func (p *serviceProvider) ClientService() service.ClientService {
+	if p.clientService == nil {
+		p.clientService = client2.NewService(p.ClientRepository())
+	}
+	return p.clientService
+}
+
+func (p *serviceProvider) ClientRepository() repository.ClientRepository {
+	if p.clientRepository == nil {
+		p.clientRepository = client.NewRepository()
+	}
+	return p.clientRepository
+}
+
+func (p *serviceProvider) ErrorMessageSource() httperr.ErrorMessageSource {
 	if p.errMessageSource == nil {
-		p.errMessageSource = err.NewMessageSource()
+		p.errMessageSource = httperr.NewMessageSource()
 	}
 	return p.errMessageSource
 }
 
-func (p *serviceProvider) ErrorHandler() err.ErrorHandler {
+func (p *serviceProvider) ErrorHandler() httperr.ErrorHandler {
 	if p.errHandler == nil {
-		p.errHandler = err.NewHandler(p.ErrorMessageSource())
+		p.errHandler = httperr.NewHandler(p.ErrorMessageSource())
 	}
 	return p.errHandler
 }

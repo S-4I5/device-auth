@@ -33,13 +33,13 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=device-service
       - POSTGRES_URL=device-postgres:5432
-      - AUTH-GRPC-URL=user-service:50051
-      - USER-GRPC-URL=user-service:50052
+      - GRPC-AUTH-URL=user-service:50051
+      - GRPC-USER-URL=user-service:50052
     restart: unless-stopped
     depends_on:
       device-postgres:
         condition: service_healthy
-      user-postgres:
+      user-service:
         condition: service_started
     ports:
       - "8081:8081"

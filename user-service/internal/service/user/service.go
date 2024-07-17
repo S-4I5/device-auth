@@ -25,7 +25,7 @@ func (s *service) Create(email, password string, phoneNumber string) (entity.Use
 		return entity.UserNil(), err
 	}
 
-	user, err := s.repository.Create(email, string(hashedPassword), phoneNumber)
+	user, err := s.repository.Save(email, string(hashedPassword), phoneNumber)
 	return user, err
 }
 

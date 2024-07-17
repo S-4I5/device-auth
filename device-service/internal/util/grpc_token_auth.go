@@ -1,14 +1,20 @@
 package util
 
-import "context"
+import (
+	"context"
+	"encoding/base64"
+)
 
 type TokenAuth struct {
-	Token string
+	Username string
+	Password string
 }
 
 func (t TokenAuth) GetRequestMetadata(ctx context.Context, in ...string) (map[string]string, error) {
+	auth := t.Username + ":" + t.Password
+	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 	return map[string]string{
-		"authorization": "Bearer " + t.Token,
+		"authorization": authHeader,
 	}, nil
 }
 

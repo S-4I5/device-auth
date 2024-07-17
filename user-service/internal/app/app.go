@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"sync"
 	"user-service/internal/config"
+	"user-service/internal/model/entity"
 	"user-service/pkg/auth_v1"
 	"user-service/pkg/user_v1"
 )
@@ -34,6 +35,10 @@ func NewApp(ctx context.Context, cfg config.Config) (*App, error) {
 	}
 
 	if err := app.runMigrations(); err != nil {
+		return nil, err
+	}
+
+	if err := app.setupClients(); err != nil {
 		return nil, err
 	}
 
@@ -110,7 +115,10 @@ func (a *App) setupAuthGrpc() error {
 		log.Fatalf("failed to load key pair: %s", err)
 	}
 
-	a.grpcAuthServer = grpc.NewServer(grpc.Creds(credentials.NewServerTLSFromCert(&cert)))
+	a.grpcAuthServer = grpc.NewServer(
+		grpc.UnaryInterceptor(a.provider.AuthInterceptor().GetInterceptor()),
+		grpc.Creds(credentials.NewServerTLSFromCert(&cert)),
+	)
 
 	reflection.Register(a.grpcAuthServer)
 
@@ -137,7 +145,10 @@ func (a *App) setupUserV1Grpc() error {
 		log.Fatalf("failed to load key pair: %s", err)
 	}
 
-	a.grpcUserV1Server = grpc.NewServer(grpc.Creds(credentials.NewServerTLSFromCert(&cert)))
+	a.grpcUserV1Server = grpc.NewServer(
+		grpc.UnaryInterceptor(a.provider.AuthInterceptor().GetInterceptor()),
+		grpc.Creds(credentials.NewServerTLSFromCert(&cert)),
+	)
 
 	reflection.Register(a.grpcUserV1Server)
 
@@ -186,6 +197,26 @@ func (a *App) setupHttp(ctx context.Context) error {
 		WriteTimeout: a.config.Http.Timeout,
 	}
 
+	return nil
+}
+
+func (a *App) setupClients() error {
+	cfgClients := a.config.Clients
+	for _, curClient := range cfgClients {
+		clientEntity, err := entity.ConfigClientToEntity(curClient)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("added1: ", clientEntity)
+
+		err = a.provider.ClientService().Create(clientEntity)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("added: ", clientEntity)
+	}
 	return nil
 }
 

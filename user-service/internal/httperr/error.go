@@ -1,4 +1,4 @@
-package err
+package httperr
 
 const (
 	unprocessableEntity         = "api.unprocessable_entity"
@@ -8,7 +8,7 @@ const (
 )
 
 type Dto struct {
-	Error       string `json:"err"`
+	Error       string `json:"error"`
 	Message     string `json:"message"`
 	MessageCode string `json:"messageCode"`
 }

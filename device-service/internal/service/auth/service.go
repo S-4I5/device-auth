@@ -8,6 +8,7 @@ import (
 	service2 "device-service/internal/service"
 	"fmt"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"s4i5.xyz/user-service/pkg/auth_v1"
 	"s4i5.xyz/user-service/pkg/user_v1"
@@ -18,7 +19,6 @@ type service struct {
 	deviceService service2.DeviceService
 	tokenCreator  jwt.TokenCreator
 	authClient    auth_v1.AuthV1Client
-	userClient    user_v1.UserV1Client
 }
 
 func NewService(codeService service2.CodeService, deviceService service2.DeviceService, tokenCreator jwt.TokenCreator, authClient auth_v1.AuthV1Client, userClient user_v1.UserV1Client) *service {
@@ -27,14 +27,10 @@ func NewService(codeService service2.CodeService, deviceService service2.DeviceS
 		deviceService: deviceService,
 		tokenCreator:  tokenCreator,
 		authClient:    authClient,
-		userClient:    userClient,
 	}
 }
 
 func (s *service) SingUp(req dto.SingUpDeviceRequestDto) (dto.SingUpDeviceResponseDto, error) {
-
-	fmt.Printf(req.PhoneNumber)
-
 	device, err := s.deviceService.Create(entity.Device{
 		PhoneNumber: req.PhoneNumber,
 	})
@@ -49,6 +45,7 @@ func (s *service) SingUp(req dto.SingUpDeviceRequestDto) (dto.SingUpDeviceRespon
 		return dto.SingUpDeviceResponseDto{}, err
 	}
 
+	//TODO: send code in other wayXD
 	log.Println(code.Code)
 
 	tkn, err := s.tokenCreator.CreateCodeToken(code)
@@ -70,7 +67,7 @@ func (s *service) LoginUser(req dto.LoginUserRequestDto, deviceId uuid.UUID) (dt
 		return dto.LoginUserResponseDto{}, err
 	}
 
-	if device.PinCode != req.Pin {
+	if err = bcrypt.CompareHashAndPassword([]byte(device.PinCode), []byte(req.Pin)); err != nil {
 		return dto.LoginUserResponseDto{}, fmt.Errorf("incorrect pin")
 	}
 

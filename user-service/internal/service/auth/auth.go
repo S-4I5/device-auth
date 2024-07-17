@@ -75,10 +75,6 @@ func (s *service) LoginUser(dto dtoPack.LoginUserRequestDto) (dtoPack.LoginUserR
 }
 
 func (s *service) AuthenticateUserBySideApp(userId uuid.UUID, issuerId string) (string, error) {
-	if issuerId != "device_app_secret_id" {
-		return "", fmt.Errorf("unknown issuer: %s", issuerId)
-	}
-
 	user, err := s.userService.Get(userId)
 	if err != nil {
 		return "", err

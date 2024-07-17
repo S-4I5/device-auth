@@ -18,7 +18,7 @@ func NewService(codeRepository repository.CodeRepository) *service {
 func (s *service) Create(code entity.ActivationCode) (entity.ActivationCode, error) {
 	code.Code = generateCode(5)
 
-	return s.codeRepository.Create(code)
+	return s.codeRepository.Save(code)
 }
 
 func (s *service) GetByDevice(deviceId uuid.UUID) (entity.ActivationCode, error) {

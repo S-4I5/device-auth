@@ -1,4 +1,4 @@
-package err
+package httperr
 
 type ErrorMessageSource interface {
 	GetErrorMessage(key string) string

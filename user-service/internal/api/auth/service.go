@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"user-service/internal/api/scope"
 	"user-service/internal/service"
 	"user-service/pkg/auth_v1"
 )
@@ -14,4 +15,11 @@ func NewImplementation(authService service.AuthService) *AuthenticationServiceIm
 	return &AuthenticationServiceImplementation{
 		authService: authService,
 	}
+}
+
+func (*AuthenticationServiceImplementation) GetMethodScopeMap() scope.MethodMap {
+	return scope.NewMapBasedMethodMap(map[string]scope.Scope{
+		auth_v1.AuthV1_AuthenticateUser_FullMethodName: scope.AuthV1Authenticate,
+		auth_v1.AuthV1_ValidateToken_FullMethodName:    scope.AuthV1Validation,
+	})
 }

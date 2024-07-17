@@ -1,7 +1,8 @@
-package err
+package httperr
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -10,6 +11,8 @@ type ErrorHandler interface {
 	ReturnIncorrectPathValueError(writer http.ResponseWriter, err error)
 	ReturnProcessingResponseError(writer http.ResponseWriter, err error)
 	ReturnServiceError(writer http.ResponseWriter, err error)
+	ReturnIncorrectReqParamError(writer http.ResponseWriter)
+	ReturnUnauthenticatedError(writer http.ResponseWriter, err error)
 }
 
 type handler struct {
@@ -36,11 +39,19 @@ func (h *handler) ReturnProcessingResponseError(writer http.ResponseWriter, err 
 	h.returnError(writer, err, cannotProcessResponseEntity, 500)
 }
 
+func (h *handler) ReturnIncorrectReqParamError(writer http.ResponseWriter) {
+	h.returnError(writer, fmt.Errorf(incorrectReqParam), incorrectReqParam, 400)
+}
+
+func (h *handler) ReturnUnauthenticatedError(writer http.ResponseWriter, err error) {
+	h.returnError(writer, err, unauthenticated, 401)
+}
+
 func (h *handler) returnError(writer http.ResponseWriter, err error, message string, status int) {
 	response := Dto{
-		Error:       err.Error(),
 		Message:     message,
 		MessageCode: h.source.GetErrorMessage(message),
+		Error:       err.Error(),
 	}
 
 	writer.WriteHeader(status)

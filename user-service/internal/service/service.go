@@ -28,3 +28,8 @@ type AuthService interface {
 	AuthenticateUserBySideApp(userId uuid.UUID, issuerId string) (string, error)
 	VerifyUserToken(token string) (jwt.Claims, error)
 }
+
+type ClientService interface {
+	Create(client entity.Client) error
+	Get(id string) (entity.Client, error)
+}
