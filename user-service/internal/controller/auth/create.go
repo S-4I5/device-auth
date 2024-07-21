@@ -13,18 +13,18 @@ func (c *controller) SignUpUser(ctx context.Context) http.HandlerFunc {
 
 		var dto dto2.SignUpUserRequestDto
 		if err := json.NewDecoder(request.Body).Decode(&dto); err != nil {
-			c.errHandler.ReturnUnprocessableEntityError(writer, err)
+			c.errHandler.ReturnUnprocessableEntityError(writer, err, request.RequestURI)
 			return
 		}
 
 		resp, err := c.authService.SignUpUser(dto)
 		if err != nil {
-			c.errHandler.ReturnServiceError(writer, err)
+			c.errHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = json.NewEncoder(writer).Encode(&resp); err != nil {
-			c.errHandler.ReturnProcessingResponseError(writer, err)
+			c.errHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

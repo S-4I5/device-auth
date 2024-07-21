@@ -10,6 +10,7 @@ import (
 	"user-service/internal/config"
 	"user-service/internal/controller"
 	"user-service/internal/controller/auth"
+	"user-service/internal/controller/middleware"
 	user3 "user-service/internal/controller/user"
 	"user-service/internal/email"
 	"user-service/internal/httperr"
@@ -26,31 +27,39 @@ import (
 )
 
 type serviceProvider struct {
-	authServerImpl   *auth3.AuthenticationServiceImplementation
-	userServerImpl   *user4.UserV1ServiceImplementation
-	errMessageSource httperr.ErrorMessageSource
-	errHandler       httperr.ErrorHandler
-	tokenService     jwt.TokenService
-	config           config.Config
-	pool             *pgxpool.Pool
-	scopeValidator   scope.Validator
-	codeRepository   repository.CodeRepository
-	userRepository   repository.UserRepository
-	userService      service.UserService
-	codeService      service.CodeService
-	authService      service.AuthService
-	userController   controller.UserController
-	authController   controller.AuthController
-	authInterceptor  interceptor.AuthInterceptor
-	clientService    service.ClientService
-	clientRepository repository.ClientRepository
-	emailSender      email.Sender
+	authServerImpl         *auth3.AuthenticationServiceImplementation
+	userServerImpl         *user4.UserV1ServiceImplementation
+	errMessageSource       httperr.ErrorMessageSource
+	errHandler             httperr.ErrorHandler
+	tokenService           jwt.TokenService
+	config                 config.Config
+	pool                   *pgxpool.Pool
+	scopeValidator         scope.Validator
+	codeRepository         repository.CodeRepository
+	userRepository         repository.UserRepository
+	userService            service.UserService
+	codeService            service.CodeService
+	authService            service.AuthService
+	userController         controller.UserController
+	authController         controller.AuthController
+	authInterceptor        interceptor.AuthInterceptor
+	clientService          service.ClientService
+	clientRepository       repository.ClientRepository
+	emailSender            email.Sender
+	authMiddlewareProvider middleware.AuthMiddlewareProvider
 }
 
 func NewServiceProvider(cfg config.Config) *serviceProvider {
 	return &serviceProvider{
 		config: cfg,
 	}
+}
+
+func (p *serviceProvider) AuthMiddlewareProvider() middleware.AuthMiddlewareProvider {
+	if p.authMiddlewareProvider == nil {
+		p.authMiddlewareProvider = middleware.NewAuthMiddlewareProvider(p.TokenService(), p.ErrorHandler())
+	}
+	return p.authMiddlewareProvider
 }
 
 func (p *serviceProvider) ScopeValidator() scope.Validator {

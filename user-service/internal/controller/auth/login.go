@@ -13,18 +13,18 @@ func (c *controller) LoginUser(ctx context.Context) http.HandlerFunc {
 
 		var requestDto dto.LoginUserRequestDto
 		if err := json.NewDecoder(request.Body).Decode(&requestDto); err != nil {
-			c.errHandler.ReturnUnprocessableEntityError(writer, err)
+			c.errHandler.ReturnUnprocessableEntityError(writer, err, request.RequestURI)
 			return
 		}
 
 		response, err := c.authService.LoginUser(requestDto)
 		if err != nil {
-			c.errHandler.ReturnServiceError(writer, err)
+			c.errHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = json.NewEncoder(writer).Encode(&response); err != nil {
-			c.errHandler.ReturnProcessingResponseError(writer, err)
+			c.errHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

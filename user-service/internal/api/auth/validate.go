@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"user-service/pkg/auth_v1"
 )
 
@@ -9,7 +11,7 @@ func (a *AuthenticationServiceImplementation) ValidateToken(ctx context.Context,
 
 	claims, err := a.authService.VerifyUserToken(req.Token)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	userId, _ := claims.GetSubject()

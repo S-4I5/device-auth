@@ -14,19 +14,19 @@ func (c *controller) SignUp(ctx context.Context) http.HandlerFunc {
 		var req dto.SingUpDeviceRequestDto
 		err := json.NewDecoder(request.Body).Decode(&req)
 		if err != nil {
-			c.errorHandler.ReturnUnprocessableEntityError(writer, err)
+			c.errorHandler.ReturnUnprocessableEntityError(writer, err, request.RequestURI)
 			return
 		}
 
 		resp, err := c.authService.SingUp(req)
 		if err != nil {
-			c.errorHandler.ReturnServiceError(writer, err)
+			c.errorHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		err = json.NewEncoder(writer).Encode(resp)
 		if err != nil {
-			c.errorHandler.ReturnProcessingResponseError(writer, err)
+			c.errorHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"device-service/internal/jwt"
+	"device-service/internal/controller/middleware"
 	"device-service/internal/model/dto"
 	"encoding/json"
 	"net/http"
@@ -24,33 +24,27 @@ func (c *controller) LoginUser(ctx context.Context) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
-		token, err := c.tokenVerifier.VerifyRow(request.Header.Get("Authorization"))
+		id, err := middleware.GetSubjectUUIDFromContext(request.Context())
 		if err != nil {
-			c.errorHandler.ReturnUnauthenticatedError(writer, err)
-			return
-		}
-
-		deviceUuid, err := jwt.GetSubjectIdFromToken(*token)
-		if err != nil {
-			c.errorHandler.ReturnUnauthenticatedError(writer, err)
+			c.errorHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		var req dto.LoginUserRequestDto
 		err = json.NewDecoder(request.Body).Decode(&req)
 		if err != nil {
-			c.errorHandler.ReturnUnprocessableEntityError(writer, err)
+			c.errorHandler.ReturnUnprocessableEntityError(writer, err, request.RequestURI)
 			return
 		}
 
-		resp, err := c.authService.LoginUser(req, deviceUuid)
+		resp, err := c.authService.LoginUser(req, id)
 		if err != nil {
-			c.errorHandler.ReturnServiceError(writer, err)
+			c.errorHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = json.NewEncoder(writer).Encode(resp); err != nil {
-			c.errorHandler.ReturnProcessingResponseError(writer, err)
+			c.errorHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

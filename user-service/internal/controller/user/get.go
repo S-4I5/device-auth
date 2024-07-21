@@ -13,18 +13,18 @@ func (c *controller) Get(ctx context.Context) http.HandlerFunc {
 
 		id, err := uuid.Parse(request.PathValue("id"))
 		if err != nil {
-			c.errHandler.ReturnIncorrectPathValueError(writer, err)
+			c.errHandler.ReturnIncorrectPathValueError(writer, err, request.RequestURI)
 			return
 		}
 
 		user, err := c.userService.Get(id)
 		if err != nil {
-			c.errHandler.ReturnServiceError(writer, err)
+			c.errHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = json.NewEncoder(writer).Encode(user); err != nil {
-			c.errHandler.ReturnProcessingResponseError(writer, err)
+			c.errHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

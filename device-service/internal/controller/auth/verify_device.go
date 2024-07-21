@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"device-service/internal/jwt"
+	"device-service/internal/controller/middleware"
 	"encoding/json"
 	"net/http"
 )
@@ -13,30 +13,24 @@ func (c *controller) VerifyDevice(ctx context.Context) http.HandlerFunc {
 
 		code := request.FormValue("code")
 		if len(code) == 0 {
-			c.errorHandler.ReturnIncorrectReqParamError(writer)
+			c.errorHandler.ReturnIncorrectReqParamError(writer, request.RequestURI)
 			return
 		}
 
-		token, err := c.tokenVerifier.VerifyRow(request.Header.Get("Authorization"))
+		id, err := middleware.GetSubjectUUIDFromContext(request.Context())
 		if err != nil {
-			c.errorHandler.ReturnUnauthenticatedError(writer, err)
+			c.errorHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
-		deviceUuid, err := jwt.GetSubjectIdFromToken(*token)
+		resp, err := c.authService.VerifyDevice(code, id)
 		if err != nil {
-			c.errorHandler.ReturnUnauthenticatedError(writer, err)
-			return
-		}
-
-		resp, err := c.authService.VerifyDevice(code, deviceUuid)
-		if err != nil {
-			c.errorHandler.ReturnServiceError(writer, err)
+			c.errorHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = json.NewEncoder(writer).Encode(resp); err != nil {
-			c.errorHandler.ReturnProcessingResponseError(writer, err)
+			c.errorHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"device-service/internal/config"
 	"device-service/internal/controller"
 	auth2 "device-service/internal/controller/auth"
+	"device-service/internal/controller/middleware"
 	"device-service/internal/httperr"
 	"device-service/internal/jwt"
 	"device-service/internal/repository"
@@ -24,25 +25,33 @@ import (
 )
 
 type serviceProvider struct {
-	authController     controller.AuthController
-	config             config.Config
-	authV1Client       auth_v1.AuthV1Client
-	userV1Client       user_v1.UserV1Client
-	pool               *pgxpool.Pool
-	tokenService       jwt.TokenService
-	authService        service.AuthService
-	deviceService      service.DeviceService
-	codeService        service.CodeService
-	errorHandler       httperr.ErrorHandler
-	errorMessageSource httperr.ErrorMessageSource
-	codeRepository     repository.CodeRepository
-	deviceRepository   repository.DeviceRepository
+	authController         controller.AuthController
+	config                 config.Config
+	authV1Client           auth_v1.AuthV1Client
+	userV1Client           user_v1.UserV1Client
+	pool                   *pgxpool.Pool
+	tokenService           jwt.TokenService
+	authService            service.AuthService
+	deviceService          service.DeviceService
+	codeService            service.CodeService
+	errorHandler           httperr.ErrorHandler
+	errorMessageSource     httperr.ErrorMessageSource
+	codeRepository         repository.CodeRepository
+	deviceRepository       repository.DeviceRepository
+	authMiddlewareProvider middleware.AuthMiddlewareProvider
 }
 
 func newServiceProvider(config config.Config) *serviceProvider {
 	return &serviceProvider{
 		config: config,
 	}
+}
+
+func (s *serviceProvider) AuthMiddlewareProvider() middleware.AuthMiddlewareProvider {
+	if s.authMiddlewareProvider == nil {
+		s.authMiddlewareProvider = middleware.NewAuthMiddlewareProvider(s.TokenService(), s.ErrorHandler())
+	}
+	return s.authMiddlewareProvider
 }
 
 func (s *serviceProvider) AuthController() controller.AuthController {

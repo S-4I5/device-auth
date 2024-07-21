@@ -16,12 +16,12 @@ func (c *controller) GetByPhoneNumber(ctx context.Context) http.HandlerFunc {
 
 		user, err := c.userService.GetByPhoneNumber(phone)
 		if err != nil {
-			c.errHandler.ReturnServiceError(writer, err)
+			c.errHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = json.NewEncoder(writer).Encode(mapper.UserToUserDto(user)); err != nil {
-			c.errHandler.ReturnProcessingResponseError(writer, err)
+			c.errHandler.ReturnProcessingResponseError(writer, err, request.RequestURI)
 			return
 		}
 	}

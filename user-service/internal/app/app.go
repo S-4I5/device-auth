@@ -167,7 +167,10 @@ func (a *App) setupHttp(ctx context.Context) error {
 
 	userRouter := http.NewServeMux()
 
-	userRouter.HandleFunc("GET /me", a.provider.UserController().GetMe(ctx))
+	userGetMeRoute := http.NewServeMux()
+	userGetMeRoute.HandleFunc("/", a.provider.UserController().GetMe(ctx))
+	userRouter.Handle("GET /me", a.provider.AuthMiddlewareProvider().GetAuthMiddleware(userGetMeRoute))
+
 	userRouter.HandleFunc("GET /{id}", a.provider.UserController().Get(ctx))
 	userRouter.HandleFunc("GET /search", a.provider.UserController().GetByPhoneNumber(ctx))
 

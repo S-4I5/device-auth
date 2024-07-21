@@ -13,4 +13,7 @@ type Dto struct {
 	Error       string `json:"error"`
 	Message     string `json:"message"`
 	MessageCode string `json:"messageCode"`
+	Path        string `json:"path"`
+	Timestamp   string `json:"timestamp"`
+	Status      int    `json:"status"`
 }

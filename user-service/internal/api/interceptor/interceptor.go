@@ -3,7 +3,6 @@ package interceptor
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -17,8 +16,8 @@ import (
 var (
 	errMissingMetadata                  = status.Errorf(codes.InvalidArgument, "missing metadata")
 	errInvalidCredentials               = status.Errorf(codes.Unauthenticated, "invalid credentials")
-	errNoClientInContext                = fmt.Errorf("no client in context")
-	errCannotCastValueInContextToClient = fmt.Errorf("cannot cast value in context to client")
+	errNoClientInContext                = status.Errorf(codes.Internal, "no client in context")
+	errCannotCastValueInContextToClient = status.Errorf(codes.Internal, "cannot cast value in context to client")
 )
 
 const (

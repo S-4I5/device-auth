@@ -46,10 +46,22 @@ func (a *App) setupHttp() error {
 	ctx := context.TODO()
 
 	authRouter.HandleFunc("POST /sign-up", a.provider.AuthController().SignUp(ctx))
-	authRouter.HandleFunc("PATCH /verify-device", a.provider.AuthController().VerifyDevice(ctx))
-	authRouter.HandleFunc("PATCH /set-pin", a.provider.AuthController().SetPin(ctx))
-	authRouter.HandleFunc("POST /login", a.provider.AuthController().LoginUser(ctx))
-	authRouter.HandleFunc("PATCH /bind-user", a.provider.AuthController().BindUser(ctx))
+
+	verifyDeviceRoute := http.NewServeMux()
+	verifyDeviceRoute.HandleFunc("/", a.provider.AuthController().VerifyDevice(ctx))
+	authRouter.Handle("PATCH /verify-device", a.provider.AuthMiddlewareProvider().GetAuthMiddlewareProvider(verifyDeviceRoute))
+
+	setPinRoute := http.NewServeMux()
+	setPinRoute.HandleFunc("/", a.provider.AuthController().SetPin(ctx))
+	authRouter.Handle("PATCH /set-pin", a.provider.AuthMiddlewareProvider().GetAuthMiddlewareProvider(setPinRoute))
+
+	loginRoute := http.NewServeMux()
+	loginRoute.HandleFunc("/", a.provider.AuthController().LoginUser(ctx))
+	authRouter.Handle("POST /login", a.provider.AuthMiddlewareProvider().GetAuthMiddlewareProvider(loginRoute))
+
+	bindUserRoute := http.NewServeMux()
+	bindUserRoute.HandleFunc("/", a.provider.AuthController().BindUser(ctx))
+	authRouter.Handle("PATCH /bind-user", a.provider.AuthMiddlewareProvider().GetAuthMiddlewareProvider(bindUserRoute))
 
 	version := http.NewServeMux()
 

@@ -14,6 +14,7 @@ func NewMessageSource() *source {
 		cannotProcessResponseEntity: "cannot process response entity",
 		serviceError:                "error while processing request",
 		incorrectPathValue:          "incorrect path value",
+		authorizationError:          "cannot authorize user",
 	}}
 }
 

@@ -30,6 +30,12 @@ func NewService(codeService service2.CodeService, deviceService service2.DeviceS
 	}
 }
 
+var (
+	errPinCodeAlreadySet = fmt.Errorf("pin code is already set")
+	errPinCodeIsNotSet   = fmt.Errorf("pin code is not set")
+	errIncorrectCode     = fmt.Errorf("incorrect code")
+)
+
 func (s *service) SingUp(req dto.SingUpDeviceRequestDto) (dto.SingUpDeviceResponseDto, error) {
 	device, err := s.deviceService.Create(entity.Device{
 		PhoneNumber: req.PhoneNumber,
@@ -57,6 +63,15 @@ func (s *service) SingUp(req dto.SingUpDeviceRequestDto) (dto.SingUpDeviceRespon
 }
 
 func (s *service) SetPin(req dto.SetPinRequestDto, deviceId uuid.UUID) error {
+	device, err := s.deviceService.Get(deviceId)
+	if err != nil {
+		return err
+	}
+
+	if device.PinCode != "" {
+		return errPinCodeIsNotSet
+	}
+
 	return s.deviceService.SetPin(deviceId, req.PinCode)
 }
 
@@ -65,6 +80,10 @@ func (s *service) LoginUser(req dto.LoginUserRequestDto, deviceId uuid.UUID) (dt
 	device, err := s.deviceService.Get(deviceId)
 	if err != nil {
 		return dto.LoginUserResponseDto{}, err
+	}
+
+	if device.PinCode == "" {
+		return dto.LoginUserResponseDto{}, errPinCodeAlreadySet
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(device.PinCode), []byte(req.Pin)); err != nil {
@@ -87,7 +106,7 @@ func (s *service) VerifyDevice(code string, codeId uuid.UUID) (dto.VerifyDeviceR
 	}
 
 	if actCode.Code != code {
-		return dto.VerifyDeviceResponseDto{}, fmt.Errorf("incorrect code")
+		return dto.VerifyDeviceResponseDto{}, errIncorrectCode
 	}
 
 	if err = s.deviceService.Verify(actCode.DeviceId); err != nil {
@@ -113,7 +132,6 @@ func (s *service) VerifyDevice(code string, codeId uuid.UUID) (dto.VerifyDeviceR
 
 func (s *service) BindUserToDevice(req dto.BindUserToDeviceDtoRequest, deviceId uuid.UUID) error {
 	ctx := context.TODO()
-	fmt.Printf(req.UserToken)
 
 	authResp, err := s.authClient.ValidateToken(ctx, &auth_v1.ValidateTokenRequest{Token: req.UserToken})
 	if err != nil {

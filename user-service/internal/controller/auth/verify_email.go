@@ -12,12 +12,12 @@ func (c *controller) VerifyUserEmail(ctx context.Context) http.HandlerFunc {
 
 		codeId, err := uuid.Parse(request.PathValue("id"))
 		if err != nil {
-			c.errHandler.ReturnIncorrectPathValueError(writer, err)
+			c.errHandler.ReturnIncorrectPathValueError(writer, err, request.RequestURI)
 			return
 		}
 
 		if err = c.authService.VerifyUserEmail(codeId); err != nil {
-			c.errHandler.ReturnServiceError(writer, err)
+			c.errHandler.ReturnServiceError(writer, err, request.RequestURI)
 			return
 		}
 	}
